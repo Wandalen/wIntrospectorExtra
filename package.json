@@ -28,13 +28,13 @@
     "url": "https://github.com/Wandalen/wIntrospectorExtra/issues"
   },
   "dependencies": {
-    "wTools": "",
-    "wprocess": "",
-    "wintrospectorbasic": "",
-    "wfilesbasic": ""
+    "wTools": "delta",
+    "wprocess": "delta",
+    "wintrospectorbasic": "delta",
+    "wfilesbasic": "delta"
   },
   "devDependencies": {
-    "wTesting": "",
+    "wTesting": "delta",
     "eslint": "7.1.0"
   },
   "keywords": [
