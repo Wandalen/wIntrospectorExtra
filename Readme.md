@@ -21,4 +21,3 @@ npm add 'wintrospectorextra@stable'
 ```
 
 `Willbe` is not required to use the module in your project as submodule.
-
