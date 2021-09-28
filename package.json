@@ -1,6 +1,6 @@
 {
   "name": "wintrospectorextra",
-  "version": "0.3.249",
+  "version": "0.3.250",
   "description": "Collection of cross-platform routines to write programs on drive.",
   "author": "Kostiantyn Wandalen <wanalen@01.school>",
   "contributors": [
@@ -28,13 +28,13 @@
     "url": "https://github.com/Wandalen/wIntrospectorExtra/issues"
   },
   "dependencies": {
-    "wTools": "delta",
-    "wprocess": "delta",
-    "wintrospectorbasic": "delta",
-    "wfilesbasic": "delta"
+    "wTools": "gamma",
+    "wprocess": "gamma",
+    "wintrospectorbasic": "gamma",
+    "wfilesbasic": "gamma"
   },
   "devDependencies": {
-    "wTesting": "delta",
+    "wTesting": "gamma",
     "eslint": "7.1.0"
   },
   "keywords": [
