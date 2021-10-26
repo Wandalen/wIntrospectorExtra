@@ -28,13 +28,13 @@
     "url": "https://github.com/Wandalen/wIntrospectorExtra/issues"
   },
   "dependencies": {
-    "wTools": "",
-    "wprocess": "",
-    "wintrospectorbasic": "",
-    "wfilesbasic": ""
+    "wTools": "gamma",
+    "wprocess": "gamma",
+    "wintrospectorbasic": "gamma",
+    "wfilesbasic": "gamma"
   },
   "devDependencies": {
-    "wTesting": "",
+    "wTesting": "gamma",
     "eslint": "7.32.0"
   },
   "keywords": [
