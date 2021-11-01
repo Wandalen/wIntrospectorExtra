@@ -8,6 +8,7 @@ if( typeof module !== 'undefined' )
   const _ = require( 'Tools' );
   require( '../l2_introspector/entry/IntrospectorExtra.s' );
   _.include( 'wTesting' );
+  _.include( 'wProcess' );
 }
 
 const _global = _global_;
@@ -496,7 +497,7 @@ programRoutine1
 makeOptionRoutineCode.description =
 `
 - making from option routineCode works
-`
+`;
 
 //
 
@@ -1485,6 +1486,80 @@ function makeDiffName( test )
 makeDiffName.experimental = 1;
 /* xxx : maybe enable? */
 
+//
+
+function makeWithDinamicDispatchOfStarter( test )
+{
+  const a = test.assetFor( false );
+
+  const starterFunction = _.process.starter;
+  const startFunction = _.process.start;
+  delete _.process.starter;
+  delete _.process.start;
+  const program = _.program.make({ entry : testApp });
+
+  /* - */
+
+  test.case = 'initial';
+  test.true( 'start' in program );
+  test.true( _.routine.is( program.start ) );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+
+    var onErrorCallback = ( err, arg ) =>
+    {
+      test.true( _.error.is( err ) );
+      test.identical( arg, undefined );
+      var exp = 'Feature with starting of process by routine `start` is pluggable.'
+      + '\nPlease, add dependency `wProcess` manually to enable feature.';
+      test.identical( err.originalMessage, exp );
+    };
+    test.shouldThrowErrorSync( () => program.start(), onErrorCallback );
+    return null;
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'with dinamically added routine';
+    _.process.starter = starterFunction;
+    _.process.start = startFunction;
+    return null;
+  });
+  a.ready.then( () => program.start() );
+  a.ready.then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( op.output, 'foo\n' );
+    return null;
+  });
+
+  a.ready.finally( ( err, arg ) =>
+  {
+    _.process.starter = starterFunction;
+    _.process.start = startFunction;
+
+    if( err )
+    throw _.err( err );
+    return arg;
+  });
+
+  /* - */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    console.log( 'foo' );
+  }
+}
+
 // --
 // declare
 // --
@@ -1505,7 +1580,6 @@ const Proto =
 
   tests :
   {
-
     preformBasic,
 
     writeBasic,
@@ -1527,6 +1601,7 @@ const Proto =
     makeEntryAndFilesCodeLocals,
     makeDiffName,
 
+    makeWithDinamicDispatchOfStarter,
   },
 
 }
