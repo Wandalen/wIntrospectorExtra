@@ -5,10 +5,10 @@
 
 /**
  * Collection of cross-platform routines to generate functions.
-  @namespace Tools.program
-  @extends Tools
-  @module Tools/base/IntrospectorExtra
-*/
+ * @namespace Tools.program
+ * @extends Tools
+ * @module Tools/base/IntrospectorExtra
+ */
 
 const _global = _global_;
 const _ = _global_.wTools;
@@ -41,7 +41,7 @@ groupPreformLocals_body.defaults =
 {
   locals : null,
   withSubmodules : true,
-}
+};
 
 let groupPreformLocals = _.routine.unite( null, groupPreformLocals_body );
 
@@ -576,17 +576,13 @@ let preform = _.routine.unite( preform_head, preform_body );
 
 function fileWrite( o )
 {
-
   _.routine.options( fileWrite, o );
 
-  if( o.filePath/*programPath*/ === null )
+  if( o.filePath === null )
   {
     o.dirPath = o.dirPath === null ? o.group.dirPath : o.dirPath;
     o.namePrefix = o.namePrefix === null ? o.group.namePrefix : o.namePrefix;
     o.namePostfix = o.namePostfix === null ? o.group.namePostfix : o.namePostfix;
-    // o.dirPath = o.dirPath !== null ? o.dirPath : o.group.dirPath;
-    // o.namePrefix = o.namePrefix !== null ? o.namePrefix : o.group.namePrefix;
-    // o.namePostfix = o.namePostfix !== null ? o.namePostfix : o.group.namePostfix;
     if( !o.group.tempPath )
     {
       o.group.tempObject = _.program._tempOpen();
@@ -597,25 +593,12 @@ function fileWrite( o )
     _.assert( _.strIs( o.namePrefix ), 'Expects name prefix {- o.namePrefix -}' );
     _.assert( _.strIs( o.namePostfix ), 'Expects name postfix {- o.namePostfix -}' );
     o.filePath = _.path.join( o.group.tempPath, o.group.dirPath, o.group.namePrefix + o.name + o.group.namePostfix );
-    // o.programPath = _.path.join( o.group.tempPath, o.group.dirPath, o.group.namePrefix + o.name + o.group.namePostfix );
   }
 
   if( !o.group.rewriting )
-  _.sure( !_.fileProvider.fileExists( o.filePath/*programPath*/ ), `Prgoram ${o.filePath/*programPath*/} already exists!` );
+  _.sure( !_.fileProvider.fileExists( o.filePath ), `Prgoram ${o.filePath/*programPath*/} already exists!` );
 
-  o.start = _.process.starter
-  ({
-    execPath : o.filePath/*programPath*/,
-    currentPath : _.path.dir( o.filePath/*programPath*/ ),
-    outputCollecting : 1,
-    outputPiping : 1,
-    inputMirroring : 1,
-    throwingExitCode : 1,
-    logger : o.group.logger,
-    mode : 'fork',
-  });
-
-  _.fileProvider.fileWrite( o.filePath/*programPath*/, o.fullCode );
+  _.fileProvider.fileWrite( o.filePath, o.fullCode );
   console.log( _.strLinesNumber( o.fullCode ) );
 
   return o;
@@ -694,9 +677,6 @@ function write_body( o )
 
   _.program.groupWrite.body.call( _.program, o.group );
 
-  o.filePath/*programPath*/ = o.group.entry.filePath/*programPath*/;
-  o.start = o.group.entry.start;
-
   return o;
 }
 
@@ -713,20 +693,92 @@ write_body.defaults =
   filePath/*programPath*/ : null,
   entry : null,
   files : null,
-}
+};
 
-let write = _.routine.unite( preform_head, write_body );
+const write = _.routine.unite( preform_head, write_body );
+
+//
+
+function starterAdd( o )
+{
+  if( _.process && _.process.starter )
+  {
+    for( let key in o.files )
+    {
+      const entry = o.files[ key ];
+      entry.start = _.process.starter
+      ({
+        execPath : entry.filePath,
+        currentPath : _.path.dir( entry.filePath ),
+        outputCollecting : 1,
+        outputPiping : 1,
+        inputMirroring : 1,
+        throwingExitCode : 1,
+        logger : entry.group.logger,
+        mode : 'fork',
+      });
+    }
+  }
+  else
+  {
+    for( let key in o.files )
+    {
+      const entry = o.files[ key ];
+      entry.start = dinamicStartMaybe.bind( entry );
+    }
+  }
+
+  o.filePath = o.group.entry.filePath;
+  o.start = o.group.entry.start;
+
+  return o;
+
+  /* */
+
+  function dinamicStartMaybe( options )
+  {
+    const self = this;
+    options = options || Object.create( null );
+
+    let result;
+    try
+    {
+      result = _.process.start
+      ({
+        execPath : this.filePath,
+        currentPath : _.path.dir( this.filePath ),
+        outputCollecting : 1,
+        outputPiping : 1,
+        inputMirroring : 1,
+        throwingExitCode : 1,
+        logger : this.group.logger,
+        mode : 'fork',
+        ... options,
+      });
+    }
+    catch( err )
+    {
+      _.error.attend( err );
+      throw _.err
+      (
+        'Feature with starting of process by routine `start` is pluggable.',
+        '\nPlease, add dependency `wProcess` manually to enable feature.'
+      );
+    }
+    return result;
+  }
+}
 
 //
 
 function make_body( o )
 {
-
   _.map.assertHasAll( o, make_body.defaults );
   _.map.assertHasOnly( o, make_body.defaults );
 
   this.preform.body.call( this, o );
   this.write.body.call( this, o );
+  this.starterAdd.call( this, o );
 
   return o;
 }
@@ -735,7 +787,7 @@ make_body.defaults =
 {
   ... preform_body.defaults,
   ... write_body.defaults,
-}
+};
 
 let make = _.routine.unite( preform_head, make_body );
 
@@ -752,19 +804,21 @@ function _tempOpen()
 
 let ProgramExtension =
 {
-
   groupPreformLocals,
   filePreform,
   groupPreform,
   preform,
+
   fileWrite,
   groupWrite,
   write,
+
+  starterAdd,
+
   make,
 
   _tempOpen,
-
-}
+};
 
 Object.assign( _.program, ProgramExtension );
 
