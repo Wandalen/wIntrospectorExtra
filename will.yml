@@ -291,9 +291,6 @@ submodule:
   wTools:
     path: 'npm:///wTools'
     enabled: 0
-  wprocess:
-    path: 'npm:///wprocess'
-    enabled: 0
   wFilesBasic:
     path: 'npm:///wfilesbasic'
     enabled: 0
@@ -302,6 +299,11 @@ submodule:
     enabled: 0
   wTesting:
     path: 'npm:///wTesting'
+    enabled: 0
+    criterion:
+      development: 1
+  wprocess:
+    path: 'npm:///wprocess'
     enabled: 0
     criterion:
       development: 1
